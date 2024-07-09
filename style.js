@@ -1,16 +1,16 @@
+// Valor remera en Pesos Argentinos
+const productos = [
+  { nombre: "Remera 1", precio: 6500 },
+  { nombre: "Remera 2", precio: 6300 },
+  { nombre: "Remera 3", precio: 7000 }
+];
+
 // Capturar entradas mediante prompt()
 let nombreUsuario = prompt("Ingrese su nombre: ").toUpperCase();
 let apellidoUsuario = prompt("Ingrese su apellido: ").toUpperCase();
 
 // Saludo
 alert(`¡Hola ${nombreUsuario} ${apellidoUsuario}! Bienvenido a la tienda Yonkys`);
-
-// Declarar productos como un array de objetos
-const productos = [
-  { nombre: "Remera 1", precio: 6500 },
-  { nombre: "Remera 2", precio: 6300 },
-  { nombre: "Remera 3", precio: 7000 }
-];
 
 // Función para mostrar opciones de productos
 function mostrarOpcionesProductos() {
@@ -41,25 +41,20 @@ function ingresarCantidad(producto) {
   // Validar cantidad del producto seleccionado
   if (isNaN(cantidadProducto) || cantidadProducto < 1) {
     alert("Error: La cantidad ingresada no es válida.");
-    return null;
+    return ingresarCantidad(producto); // Reintentar ingreso
   } else {
     return cantidadProducto;
   }
 }
 
 // Función para calcular el total sin descuento
-function calcularTotal(precio, cantidad) {
-  return precio * cantidad;
-}
-
-// Función para aplicar descuento solo al final si corresponde
-function aplicarDescuentoSiAplica(total, porcentajeDescuento) {
-  return total * (1 - porcentajeDescuento / 100);
+function calcularTotal(producto, cantidad) {
+  return producto.precio * cantidad;
 }
 
 let continuar = true;
 let productosSeleccionados = [];
-let totalProductosSinDescuento = 0;
+let totalCantidadProductos = 0;
 
 while (continuar) {
   // Mostrar opciones de producto
@@ -77,8 +72,8 @@ while (continuar) {
 
     if (cantidadProducto !== null) {
       // Calcular total sin descuento
-      let totalSinDescuento = calcularTotal(productoSeleccionado.precio, cantidadProducto);
-      alert(`Total sin descuento: ${totalSinDescuento} pesos argentinos.`);
+      let totalSinDescuento = calcularTotal(productoSeleccionado, cantidadProducto);
+      alert(`Total: ${totalSinDescuento} pesos argentinos.`);
 
       // Agregar producto al detalle
       productosSeleccionados.push({
@@ -87,7 +82,7 @@ while (continuar) {
         totalSinDescuento: totalSinDescuento
       });
 
-      totalProductosSinDescuento += totalSinDescuento;
+      totalCantidadProductos += cantidadProducto;
 
       // Preguntar si desea seguir comprando
       continuar = confirm("¿Desea agregar más productos?");
@@ -97,10 +92,18 @@ while (continuar) {
   }
 }
 
-// Aplicar descuento solo al final si corresponde
+// Calcular total sin descuento de todos los productos seleccionados
+let totalProductosSinDescuento = productosSeleccionados.reduce((total, producto) => total + producto.totalSinDescuento, 0);
+
+// Aplicar descuento solo al final si corresponde más de 3 productos
 let totalProductosConDescuento = totalProductosSinDescuento;
-if (productosSeleccionados.length >= 3) {
-  totalProductosConDescuento = aplicarDescuentoSiAplica(totalProductosSinDescuento, 10);
+if (totalCantidadProductos > 3) {
+  totalProductosConDescuento = aplicarDescuento(totalProductosSinDescuento, 10);
+}
+
+// Función para aplicar descuento al total final si corresponde
+function aplicarDescuento(total, porcentajeDescuento) {
+  return total * (1 - porcentajeDescuento / 100);
 }
 
 // Mostrar detalle de productos seleccionados
@@ -108,11 +111,14 @@ let detalleProductos = "\nDetalle de Productos Seleccionados:\n";
 productosSeleccionados.forEach((producto, index) => {
   detalleProductos += `Producto ${index + 1}: ${producto.producto} - Cantidad: ${producto.cantidad} - Total: ${producto.totalSinDescuento} pesos argentinos\n`;
 });
-alert(detalleProductos);
 
-// Mostrar total de productos y descuento solo al final si aplica
+// Mostrar total de productos y aplicar descuento si corresponde
 if (productosSeleccionados.length > 0) {
-  alert(`Total de Productos Seleccionados: ${productosSeleccionados.length}\nTotal a Pagar: ${totalProductosConDescuento} pesos argentinos`);
+  if (totalCantidadProductos > 3) {
+    alert(`${detalleProductos}\nTotal de Productos Seleccionados: ${totalCantidadProductos}\nTotal a Pagar con Descuento del 10%: ${totalProductosConDescuento} pesos argentinos`);
+  } else {
+    alert(`${detalleProductos}\nTotal de Productos Seleccionados: ${totalCantidadProductos}\nTotal a Pagar: ${totalProductosConDescuento} pesos argentinos`);
+  }
 } else {
   alert("No se han seleccionado productos.");
 }
